@@ -9,7 +9,7 @@
         <h6 class="m-0 font-weight-bold text-primary">Biodata</h6>
     </div>
     <div class="card-body">
-        <form action="{{ route('admin.prosesEdit', ['id' => $anggota->id]) }}" method="POST">
+        <form action="{{ route('anggota.edit.post') }}" method="POST">
             @csrf
             <div class="form-group">
                 <label for="nia">NIA </label>

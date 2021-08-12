@@ -24,6 +24,18 @@
 
     <!-- Custom styles for tables pages -->
     <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+    
+    <style type="text/css">
+        .image{
+            width: 100%;
+            background-color: whitesmoke;
+            height: 10cm;
+        }
+
+        .image .text-center {
+            padding-top: 5cm;
+        }
+    </style>
 
 </head>
 

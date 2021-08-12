@@ -17,3 +17,47 @@
 <script src="{{ asset('js/demo/chart-area-demo.js') }}"></script>
 <script src="{{ asset('js/demo/chart-pie-demo.js') }}"></script>
 <script src="{{ asset('js/demo/datatables-demo.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        $("#tambahPrestasi").click(function() {
+            $("#prestasiField").append($("#templatePrestasi").html());
+        });
+
+        $("#formEdit").on("click", ".remove", function() {
+            $(this).parent().remove();
+        });
+    });
+    
+    $(document).ready(function() {
+        $("#tambahPengurus").click(function() {
+            $("#pengurusField").append($("#templatePengurus").html());
+        });
+
+        $("#formEdit").on("click", ".remove", function() {
+            $(this).parent().remove();
+        });
+    });
+
+    const prestasi = document.getElementsByClassName("addPrestasi")
+    for (let index = 0; index < prestasi.length; index++) {
+        const pres = prestasi[index]
+        if (index!=0) {
+            pres.className = "remove btn btn-danger btn-sm btn-icon-split addPrestasi"
+            pres.children[0].children[0].className = "fas fa-trash"
+            pres.children[1].innerHTML = "Hapus"
+            pres.removeAttribute('id')
+        }
+    }
+    
+
+    const status_pengurus = document.getElementsByClassName("addPengurus")
+    for (let index = 0; index < status_pengurus.length; index++) {
+        const pengurus = status_pengurus[index]
+        if (index!=0) {
+            pengurus.className = "remove btn btn-danger btn-sm btn-icon-split addPrestasi"
+            pengurus.children[0].children[0].className = "fas fa-trash"
+            pengurus.children[1].innerHTML = "Hapus"
+            pengurus.removeAttribute('id')
+        }
+    }
+</script>

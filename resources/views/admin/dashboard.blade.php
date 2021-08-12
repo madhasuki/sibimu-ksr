@@ -39,7 +39,7 @@
                             </td>
                             <td>
                                 <a href="{{ route('admin.detail.anggota', ['id'=>$agt->id]) }}" class="text-gray-600">
-                                    {{ $agt->nomor_induk_anggota }}
+                                    {{ $agt->nia }}
                                 </a> 
                             </td>
                             <td>

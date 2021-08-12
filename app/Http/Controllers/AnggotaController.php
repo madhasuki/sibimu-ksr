@@ -3,71 +3,35 @@
 namespace App\Http\Controllers;
 
 use Image;
-use App\Models\Anggota;
-use App\Models\Role;
-use App\Models\User;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
-class AdminController extends Controller
+class AnggotaController extends Controller
 {
-    public function admin()
+    public function index()
     {
         $user = Auth::user();
-        $anggota = Anggota::all();
-        return view('admin/dashboard', compact('user', 'anggota'));
-    }
+        $anggota = $user->anggota;
 
-    public function detail($id)
-    {
-        $user = Auth::user();
-        $anggota = Anggota::find($id);
         $prestasi = explode(",", str_replace(array('[', '"', ']'), ' ', $anggota->prestasi));
         $status = explode(",", str_replace(array('[', '"', ']'), ' ', $anggota->status_pengurus));
-
-        return view('admin/anggota', compact('user', 'anggota', 'prestasi', 'status'));
+        return view('pengguna.index', compact('user', 'anggota', 'prestasi', 'status'));
     }
 
-    public function tambah()
+    // Menampilkan edit profil halaman pertama
+    public function editHalamanSatu()
     {
         $user = Auth::user();
-        return view('admin/tambah_anggota', compact('user'));
+        $anggota = $user->anggota;
+        return view('pengguna.edit', compact('user', 'anggota'));
     }
 
-    public function prosesTambah(Request $request)
+    // post request menyimpan hasil edit halaman pertama
+    public function postEditHalamanSatu(Request $request)
     {
-        $user = User::create([
-            'name' => $request->nia,
-            'email' => $request->email,
-            'password' => Hash::make($request->nia),
-        ]);
 
-        $anggota = new Anggota;
-        $anggota->nia = $request->nia;
-        $anggota->nama_lengkap = $request->fullname;
-        $anggota->fakultas = $request->fakultas;
-        $anggota->alamat = $request->alamat;
-        $anggota->user_id = $user->id;
-        $anggota->save();
-
-        $user_anggota = Role::where('name', 'anggota')->first();
-        $user->attachRole($user_anggota);
-
-        return redirect()->route('admin.dashboard');
-    }
-
-    public function edit($id)
-    {
-        $user = Auth::user();
-        $anggota = Anggota::find($id);
-        return view('admin/edit_anggota', compact('user', 'anggota'));
-    }
-
-    public function prosesEdit(Request $request, $id)
-    {
         $anggota['nia'] = $request->nia;
         $anggota['nama_lengkap'] = $request->fullname;
         $anggota['nama_panggilan'] = $request->shortname;
@@ -82,13 +46,14 @@ class AdminController extends Controller
 
         $request->session()->put('anggota', $anggota);
 
-        return redirect()->route('admin.edit.dua.anggota', ['id' => $id]);
+        return redirect()->route('anggota.edit.kedua');
     }
 
-    public function editDua($id)
+    // Menampilkan edit profil halaman kedua
+    public function editHalamanDua()
     {
         $user = Auth::user();
-        $anggota = Anggota::find($id);
+        $anggota = $user->anggota;
         $prestasi = explode(",", str_replace(array('[', '"', ']'), ' ', $anggota->prestasi));
         $status = explode(",", str_replace(array('[', '"', ']'), ' ', $anggota->status_pengurus));
 
@@ -100,11 +65,13 @@ class AdminController extends Controller
             $prestasi = "";
         }
 
-        return view('admin/edit_kedua_anggota', compact('user', 'anggota', 'prestasi', 'status'));
+        return view('pengguna.edit_kedua', compact('user', 'anggota', 'prestasi', 'status'));
     }
 
-    public function prosesEditDua(Request $request, $id)
+    // post request menyimpan hasil edit halaman kedua
+    public function postEditHalamanDua(Request $request)
     {
+
         $anggota = $request->session()->get('anggota');
         $anggota['sd'] = $request->sd;
         $anggota['smp'] = $request->smp;
@@ -124,23 +91,24 @@ class AdminController extends Controller
 
         $request->session()->put('anggota', $anggota);
 
-        return redirect()->route('admin.edit.tiga.anggota', ['id' => $id]);
+        return redirect()->route('anggota.edit.ketiga');
     }
 
-    public function editTiga($id)
+    // Menampilkan edit profil halaman ketiga
+    public function editHalamanTiga()
     {
         $user = Auth::user();
-        $anggota = Anggota::find($id);
-        return view('admin.edit_ketiga_anggota', compact('user', 'anggota'));
+        $anggota = $user->anggota;
+        return view('pengguna.edit_ketiga', compact('user', 'anggota'));
     }
 
-    public function prosesEditTiga(Request $request, $id)
+    // post request menyimpan hasil edit halaman ketiga
+    public function postEditHalamanTiga(Request $request)
     {
         $value = $request->session()->get('anggota');
 
         $user = Auth::user();
-        $anggota = Anggota::find($id);
-        $pengguna = User::find($anggota->user_id);
+        $anggota = $user->anggota;
         $anggota->nia = $value['nia'];
         $anggota->nama_lengkap = $value['nama_lengkap'];
         $anggota->nama_panggilan = $value['nama_panggilan'];
@@ -176,7 +144,7 @@ class AdminController extends Controller
         $anggota->id_line = $request->line;
         $anggota->kesan = $request->kesan;
         $anggota->pesan = $request->pesan;
-        $pengguna->email = $request->email;
+        $user->email = $request->email;
 
         if ($request->has('fileUpload')) {
             $request->validate([
@@ -217,60 +185,39 @@ class AdminController extends Controller
         }
 
         $anggota->save();
-        $pengguna->save();
+        $user->save();
         $request->session()->forget('anggota');
 
-        return redirect()->route('admin.detail.anggota', ['id' => $id]);
+        return redirect()->route('anggota.index');
     }
 
-    public function hapus($id)
-    {
-        $anggota = Anggota::find($id);
-        $user = User::find($anggota->user_id);
-        $anggota->delete();
-        $user->delete();
-
-        return redirect()->route('admin.dashboard');
-    }
-
-    public function pengguna()
+    public function changePassword()
     {
         $user = Auth::user();
-        $pengguna = User::all();
-
-        return view('admin.pengguna', compact('user', 'pengguna'));
+        $anggota = $user->anggota;
+        return view('pengguna.changePassword', compact('user', 'anggota'));
     }
 
-    public function tambahPengurus()
+    public function change(Request $request)
     {
         $user = Auth::user();
-        return view('admin/tambah_pengurus', compact('user'));
-    }
 
-    public function prosesTambahPengurus(Request $request)
-    {
         $request->validate([
-            'username' => 'required',
-            'password' => 'required|min:8'
+            'oldpass' => 'required',
+            'newpass' => 'required|string|min:8',
+            'confpass' => 'required'
         ]);
 
-        $user = User::create([
-            'name' => $request->username,
-            'email' => $request->password,
-            'password' => Hash::make($request->password),
-        ]);
+        if (!Hash::check($request->oldpass, $user->password)) {
+            return back()->with('error', 'Password lama anda tidak sesuai!');
+        }
 
-        $user_anggota = Role::where('name', 'pengurus')->first();
-        $user->attachRole($user_anggota);
+        if ($request->newpass != $request->confpass) {
+            return back()->with('error', 'Password baru dan konfirmasi password harus sama!');
+        }
 
-        return redirect()->route('admin.pengguna');
-    }
-
-    public function hapusPengurus($id)
-    {
-        $user = User::find($id);
-        $user->delete();
-
-        return redirect()->route('admin.pengguna');
+        $user->password = Hash::make($request->newpass);
+        $user->save();
+        return back()->with('success', 'Password berhasil di ubah!');
     }
 }
